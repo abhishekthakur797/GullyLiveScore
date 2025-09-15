@@ -74,7 +74,8 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
       setBallsInCurrentOver(prev => prev + 1);
       
       if (ballsInCurrentOver + 1 >= 6) {
-        battingTeam.totalOvers = Math.floor(battingTeam.totalBalls / 6);
+        const completedOvers = Math.floor(battingTeam.totalBalls / 6);
+        battingTeam.totalOvers = completedOvers;
         setBallsInCurrentOver(0);
         setCurrentOverBalls([]);
         
@@ -84,8 +85,15 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
           nonStriker: prev.striker
         }));
         
-        // Show bowler selection for new over
-        setShowBowlerSelection(true);
+        // Check if innings is complete after this over
+        if (completedOvers >= match.settings.totalOvers) {
+          // Innings complete - don't show bowler selection
+          onInningsComplete();
+          return;
+        } else {
+          // Show bowler selection for new over
+          setShowBowlerSelection(true);
+        }
       } else if (shouldChangeStrike(ball)) {
         setCurrentBatsmen(prev => ({
           striker: prev.nonStriker,
@@ -103,8 +111,9 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
     
     // Check if innings is complete
     if (battingTeam.totalWickets >= match.settings.playersPerTeam - 1 || 
-        battingTeam.totalOvers >= match.settings.totalOvers) {
+        Math.floor(battingTeam.totalBalls / 6) >= match.settings.totalOvers) {
       onInningsComplete();
+      return;
     }
     
     if (!ball.isWicket) {
@@ -290,7 +299,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
             <div className="text-right">
               <div className="text-sm text-gray-600">Innings {match.currentInnings}</div>
               <div className="text-lg font-semibold text-gray-800">
-                Over {Math.floor(match.battingTeam.totalBalls / 6)}.{match.battingTeam.totalBalls % 6}
+                Over {Math.floor(match.battingTeam.totalBalls / 6)}.{match.battingTeam.totalBalls % 6} / {match.settings.totalOvers}
               </div>
             </div>
           </div>

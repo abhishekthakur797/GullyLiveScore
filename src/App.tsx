@@ -96,8 +96,38 @@ function App() {
       const updatedMatch = {
         ...match,
         currentInnings: 2 as const,
-        battingTeam: { ...match.bowlingTeam },
-        bowlingTeam: { ...match.battingTeam },
+        battingTeam: { 
+          ...match.bowlingTeam,
+          totalRuns: 0,
+          totalWickets: 0,
+          totalOvers: 0,
+          totalBalls: 0,
+          extras: { wides: 0, noBalls: 0, byes: 0, legByes: 0 },
+          players: match.bowlingTeam.players.map(p => ({
+            ...p,
+            battingStats: {
+              runs: 0,
+              balls: 0,
+              fours: 0,
+              sixes: 0,
+              strikeRate: 0,
+              isOut: false,
+            }
+          }))
+        },
+        bowlingTeam: { 
+          ...match.battingTeam,
+          players: match.battingTeam.players.map(p => ({
+            ...p,
+            bowlingStats: {
+              overs: 0,
+              balls: 0,
+              runs: 0,
+              wickets: 0,
+              economyRate: 0,
+            }
+          }))
+        },
       };
       setMatch(updatedMatch);
       setShowInningsBreak(true);
