@@ -52,6 +52,20 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
 
     // Update team totals
     battingTeam.totalRuns += ball.runs;
+    
+    // Check if target is achieved in second innings
+    if (match.currentInnings === 2 && battingTeam.totalRuns > bowlingTeam.totalRuns) {
+      // Target achieved! Match complete
+      updatedMatch.battingTeam = battingTeam;
+      updatedMatch.bowlingTeam = bowlingTeam;
+      updatedMatch.isComplete = true;
+      updatedMatch.winner = battingTeam.name;
+      updatedMatch.winMargin = `${match.settings.playersPerTeam - battingTeam.totalWickets} wickets`;
+      onMatchUpdate(updatedMatch);
+      onInningsComplete();
+      return;
+    }
+    
     if (ball.isExtra) {
       if (ball.extraType === 'wide') battingTeam.extras.wides += 1;
       else if (ball.extraType === 'noball') battingTeam.extras.noBalls += 1;
@@ -324,7 +338,9 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
                   Target: {match.bowlingTeam.totalRuns + 1}
                 </div>
                 <div className="text-gray-600">Need {match.bowlingTeam.totalRuns - match.battingTeam.totalRuns + 1} runs</div>
-                <div className="text-sm text-gray-500">RRR: {requiredRunRate.toFixed(2)}</div>
+                <div className="text-sm text-gray-500">
+                  RRR: {requiredRunRate > 0 ? requiredRunRate.toFixed(2) : '0.00'}
+                </div>
               </div>
             )}
 

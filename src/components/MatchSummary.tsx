@@ -11,14 +11,17 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({ match, onNewMatch }) => {
   const firstInnings = match.currentInnings === 2 ? match.bowlingTeam : match.battingTeam;
   const secondInnings = match.currentInnings === 2 ? match.battingTeam : match.bowlingTeam;
   
-  const winner = secondInnings.totalRuns > firstInnings.totalRuns ? secondInnings : 
-                 firstInnings.totalRuns > secondInnings.totalRuns ? firstInnings : null;
+  const winner = match.winner ? 
+    (match.winner === firstInnings.name ? firstInnings : secondInnings) :
+    (secondInnings.totalRuns > firstInnings.totalRuns ? secondInnings : 
+     firstInnings.totalRuns > secondInnings.totalRuns ? firstInnings : null);
   
-  const winMargin = winner ? 
-    (winner.id === secondInnings.id ? 
-      `${match.settings.playersPerTeam - secondInnings.totalWickets - 1} wickets` :
-      `${firstInnings.totalRuns - secondInnings.totalRuns} runs`) : 
-    'Match Tied';
+  const winMargin = match.winMargin || 
+    (winner ? 
+      (winner.id === secondInnings.id ? 
+        `${match.settings.playersPerTeam - secondInnings.totalWickets} wickets` :
+        `${firstInnings.totalRuns - secondInnings.totalRuns} runs`) : 
+      'Match Tied');
 
   const bestBatsman = [...match.teamA.players, ...match.teamB.players]
     .filter(p => p.battingStats.runs > 0)
