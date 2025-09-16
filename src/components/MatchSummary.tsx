@@ -19,7 +19,7 @@ const MatchSummary: React.FC<MatchSummaryProps> = ({ match, onNewMatch }) => {
   const winMargin = match.winMargin || 
     (winner ? 
       (winner.id === secondInnings.id ? 
-        `${match.settings.playersPerTeam - secondInnings.totalWickets} wickets` :
+        `${(match.settings.playersPerTeam - 1) - secondInnings.totalWickets + 1} wickets` :
         `${firstInnings.totalRuns - secondInnings.totalRuns} runs`) : 
       'Match Tied');
 

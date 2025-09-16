@@ -53,19 +53,6 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
     // Update team totals
     battingTeam.totalRuns += ball.runs;
     
-    // Check if target is achieved in second innings
-    if (match.currentInnings === 2 && battingTeam.totalRuns > bowlingTeam.totalRuns) {
-      // Target achieved! Match complete
-      updatedMatch.battingTeam = battingTeam;
-      updatedMatch.bowlingTeam = bowlingTeam;
-      updatedMatch.isComplete = true;
-      updatedMatch.winner = battingTeam.name;
-      updatedMatch.winMargin = `${match.settings.playersPerTeam - battingTeam.totalWickets} wickets`;
-      onMatchUpdate(updatedMatch);
-      onInningsComplete();
-      return;
-    }
-    
     if (ball.isExtra) {
       if (ball.extraType === 'wide') battingTeam.extras.wides += 1;
       else if (ball.extraType === 'noball') battingTeam.extras.noBalls += 1;
@@ -77,9 +64,33 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
       battingTeam.totalWickets += 1;
       battingTeam.players[strikerIndex].battingStats.isOut = true;
       
-      // Don't auto-select next batsman, let user choose
-      setPendingWicket(ball);
-      setShowBatsmanSelection(true);
+      // Check if all wickets have fallen (team size - 1 wickets = all out)
+      const maxWickets = match.settings.playersPerTeam - 1;
+      if (battingTeam.totalWickets >= maxWickets) {
+        // All out - innings complete
+        updatedMatch.battingTeam = battingTeam;
+        updatedMatch.bowlingTeam = bowlingTeam;
+        onMatchUpdate(updatedMatch);
+        onInningsComplete();
+        return;
+      } else {
+        // Don't auto-select next batsman, let user choose
+        setPendingWicket(ball);
+        setShowBatsmanSelection(true);
+      }
+    }
+    
+    // Check if target is achieved in second innings (after updating runs)
+    if (match.currentInnings === 2 && battingTeam.totalRuns > bowlingTeam.totalRuns) {
+      // Target achieved! Match complete
+      updatedMatch.battingTeam = battingTeam;
+      updatedMatch.bowlingTeam = bowlingTeam;
+      updatedMatch.isComplete = true;
+      updatedMatch.winner = battingTeam.name;
+      updatedMatch.winMargin = `${match.settings.playersPerTeam - battingTeam.totalWickets} wickets`;
+      onMatchUpdate(updatedMatch);
+      onInningsComplete();
+      return;
     }
 
     // Update balls and overs (only for legal deliveries)
@@ -123,8 +134,8 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
     updatedMatch.battingTeam = battingTeam;
     updatedMatch.bowlingTeam = bowlingTeam;
     
-    // Check if innings is complete
-    if (battingTeam.totalWickets >= match.settings.playersPerTeam - 1 || 
+    // Check if innings is complete (only if not a wicket, as wicket logic is handled above)
+    if (!ball.isWicket && (battingTeam.totalWickets >= match.settings.playersPerTeam - 1 || 
         Math.floor(battingTeam.totalBalls / 6) >= match.settings.totalOvers) {
       onInningsComplete();
       return;
@@ -132,6 +143,10 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
     
     if (!ball.isWicket) {
       onMatchUpdate(updatedMatch);
+    } else {
+      // For wickets, we update the match after batsman selection
+      // Store the updated match for later use
+      window.tempMatchUpdate = updatedMatch;
     }
   };
 
@@ -186,9 +201,10 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
     
     if (pendingWicket) {
       setCurrentOverBalls(prev => [...prev, pendingWicket]);
-      const updatedMatch = { ...match };
+      const updatedMatch = window.tempMatchUpdate || { ...match };
       onMatchUpdate(updatedMatch);
       setPendingWicket(null);
+      window.tempMatchUpdate = null;
     }
     
     setShowBatsmanSelection(false);
@@ -207,6 +223,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
     p.id !== currentBatsmen.nonStriker.id
   );
 
+  const maxWickets = match.settings.playersPerTeam - 1;
   const requiredRunRate = match.currentInnings === 2 
     ? ((match.bowlingTeam.totalRuns - match.battingTeam.totalRuns + 1) / 
        ((match.settings.totalOvers - match.battingTeam.totalOvers) || 1)) * 6
@@ -327,6 +344,9 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
               <div className="text-gray-600">{match.battingTeam.name}</div>
               <div className="text-sm text-gray-500">
                 ({Math.floor(match.battingTeam.totalBalls / 6)}.{match.battingTeam.totalBalls % 6}/{match.settings.totalOvers} overs)
+              </div>
+              <div className="text-xs text-gray-400 mt-1">
+                Max wickets: {maxWickets}
               </div>
             </div>
 

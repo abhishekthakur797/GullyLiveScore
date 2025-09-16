@@ -175,6 +175,9 @@ function App() {
           <p className="text-yellow-700 text-sm mt-1">
             Required Run Rate: {(((match?.bowlingTeam.totalRuns || 0) + 1) / match?.settings.totalOvers).toFixed(2)} per over
           </p>
+          <p className="text-yellow-700 text-sm mt-1">
+            Wickets available: {(match?.settings.playersPerTeam || 11) - 1}
+          </p>
         </div>
         <div className="text-sm text-gray-500">
           Second innings starting...
