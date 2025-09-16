@@ -345,9 +345,6 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
               <div className="text-sm text-gray-500">
                 ({Math.floor(match.battingTeam.totalBalls / 6)}.{match.battingTeam.totalBalls % 6}/{match.settings.totalOvers} overs)
               </div>
-              <div className="text-xs text-gray-400 mt-1">
-                Max wickets: {maxWickets}
-              </div>
             </div>
 
             {/* Target/RRR */}
