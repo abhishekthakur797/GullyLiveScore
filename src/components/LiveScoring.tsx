@@ -201,10 +201,9 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
     
     if (pendingWicket) {
       setCurrentOverBalls(prev => [...prev, pendingWicket]);
-      const updatedMatch = window.tempMatchUpdate || { ...match };
+      const updatedMatch = { ...match };
       onMatchUpdate(updatedMatch);
       setPendingWicket(null);
-      window.tempMatchUpdate = null;
     }
     
     setShowBatsmanSelection(false);
