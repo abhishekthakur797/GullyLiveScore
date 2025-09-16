@@ -136,7 +136,7 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
     
     // Check if innings is complete (only if not a wicket, as wicket logic is handled above)
     if (!ball.isWicket && (battingTeam.totalWickets >= match.settings.playersPerTeam - 1 || 
-        Math.floor(battingTeam.totalBalls / 6) >= match.settings.totalOvers) {
+        Math.floor(battingTeam.totalBalls / 6) >= match.settings.totalOvers)) {
       onInningsComplete();
       return;
     }
