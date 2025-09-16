@@ -223,7 +223,6 @@ const LiveScoring: React.FC<LiveScoringProps> = ({ match, onMatchUpdate, onInnin
     p.id !== currentBatsmen.nonStriker.id
   );
 
-  const maxWickets = match.settings.playersPerTeam - 1;
   const requiredRunRate = match.currentInnings === 2 
     ? ((match.bowlingTeam.totalRuns - match.battingTeam.totalRuns + 1) / 
        ((match.settings.totalOvers - match.battingTeam.totalOvers) || 1)) * 6
