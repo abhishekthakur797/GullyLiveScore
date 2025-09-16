@@ -6,13 +6,14 @@ interface TossSetupProps {
   teamA: Team;
   teamB: Team;
   playersPerTeam: number;
-  onTossComplete: (tossWinner: Team, tossDecision: 'Batting' | 'Bowling', totalOvers: number) => void;
+  onTossComplete: (tossWinner: Team, tossDecision: 'Batting' | 'Bowling', totalOvers: number, maxOversPerBowler: number) => void;
 }
 
 const TossSetup: React.FC<TossSetupProps> = ({ teamA, teamB, playersPerTeam, onTossComplete }) => {
   const [tossWinner, setTossWinner] = useState<Team | null>(null);
   const [tossDecision, setTossDecision] = useState<'Batting' | 'Bowling' | ''>('');
   const [totalOvers, setTotalOvers] = useState(5);
+  const [maxOversPerBowler, setMaxOversPerBowler] = useState(2);
   const [isFlipping, setIsFlipping] = useState(false);
   const [coinCaller, setCoinCaller] = useState<Team | null>(null);
   const [coinCall, setCoinCall] = useState<'Heads' | 'Tails' | ''>('');
@@ -38,11 +39,10 @@ const TossSetup: React.FC<TossSetupProps> = ({ teamA, teamB, playersPerTeam, onT
 
   const handleProceed = () => {
     if (tossWinner && tossDecision) {
-      onTossComplete(tossWinner, tossDecision as 'Batting' | 'Bowling', totalOvers);
+      onTossComplete(tossWinner, tossDecision as 'Batting' | 'Bowling', totalOvers, maxOversPerBowler);
     }
   };
 
-  const maxOversPerBowler = Math.floor(totalOvers / 5) || 1; // Rough calculation
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-green-50 p-4">
@@ -55,7 +55,7 @@ const TossSetup: React.FC<TossSetupProps> = ({ teamA, teamB, playersPerTeam, onT
         {/* Match Settings */}
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <h2 className="text-xl font-bold text-gray-800 mb-4">⚙️ Match Settings</h2>
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-3 gap-6">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Total Overs per Innings</label>
               <select
@@ -72,12 +72,27 @@ const TossSetup: React.FC<TossSetupProps> = ({ teamA, teamB, playersPerTeam, onT
               </select>
               <p className="text-xs text-gray-500 mt-1">Choose match duration</p>
             </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Max Overs per Bowler</label>
+              <select
+                value={maxOversPerBowler}
+                onChange={(e) => setMaxOversPerBowler(parseInt(e.target.value))}
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-medium"
+              >
+                <option value={1}>1 Over</option>
+                <option value={2}>2 Overs</option>
+                <option value={3}>3 Overs</option>
+                <option value={4}>4 Overs</option>
+                <option value={5}>5 Overs</option>
+              </select>
+              <p className="text-xs text-gray-500 mt-1">Maximum overs each bowler can bowl</p>
+            </div>
             <div className="flex items-center justify-center bg-gray-50 rounded-lg p-4">
               <div className="text-center">
-                <div className="text-2xl font-bold text-gray-800">{maxOversPerBowler}</div>
-                <div className="text-sm text-gray-600">Max overs per bowler</div>
+                <div className="text-2xl font-bold text-gray-800">{Math.ceil(totalOvers / maxOversPerBowler)}</div>
+                <div className="text-sm text-gray-600">Min bowlers needed</div>
                 <div className="text-xs text-gray-500 mt-1">
-                  ({Math.floor(totalOvers / maxOversPerBowler)} bowlers minimum)
+                  (Based on {totalOvers} overs / {maxOversPerBowler} max per bowler)
                 </div>
               </div>
             </div>

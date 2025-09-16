@@ -95,7 +95,7 @@ export const canBowlerContinue = (bowler: Player, settings: MatchSettings): bool
 export const getAvailableBowlers = (team: Team, currentBowler: Player, settings: MatchSettings): Player[] => {
   return team.players.filter(player => 
     player.id !== currentBowler.id && 
-    canBowlerContinue(player, settings)
+    player.bowlingStats.overs < settings.maxOversPerBowler
   );
 };
 

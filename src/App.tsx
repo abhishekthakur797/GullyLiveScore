@@ -45,7 +45,7 @@ function App() {
     setCurrentState('toss');
   };
 
-  const handleTossComplete = (tossWinner: Team, tossDecision: 'Batting' | 'Bowling', totalOvers: number) => {
+  const handleTossComplete = (tossWinner: Team, tossDecision: 'Batting' | 'Bowling', totalOvers: number, maxOversPerBowler: number) => {
     const teamA = JSON.parse(localStorage.getItem('teamA') || '{}') as Team;
     const teamB = JSON.parse(localStorage.getItem('teamB') || '{}') as Team;
     
@@ -53,7 +53,7 @@ function App() {
     const settings: MatchSettings = {
       totalOvers,
       playersPerTeam: teamA.players.length,
-      maxOversPerBowler: Math.ceil(totalOvers / 5) || 2,
+      maxOversPerBowler,
     };
 
     const battingTeam = tossDecision === 'Batting' ? tossWinner : 
@@ -201,7 +201,7 @@ function App() {
           teamA={teamA}
           teamB={teamB}
           playersPerTeam={playersPerTeam}
-          onTossComplete={handleTossComplete}
+          onTossComplete={(winner, decision, overs, maxOvers) => handleTossComplete(winner, decision, overs, maxOvers)}
         />
       );
     
